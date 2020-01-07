@@ -187,12 +187,17 @@ MESSAGES = {
         """,
         "category": "success",
     },
-    "update_portfolio_members": {
+    "update_portfolio_member": {
         "title_template": "Success!",
         "message_template": """
-        <p>You have successfully updated access permissions for members of {{ portfolio.name }}.</p>
+        You have successfully updated access permissions for {{ member_name }}.
         """,
         "category": "success",
+    },
+    "update_portfolio_member_error": {
+        "title_template": "Permissions for {{ member_name }} could not be updated",
+        "message_template": "An unexpected problem occurred with your request, please try again. If the problem persists, contact an administrator.",
+        "category": "error",
     },
     "updated_application_team_settings": {
         "title_template": translate("flash.success"),
