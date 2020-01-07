@@ -156,6 +156,11 @@ MESSAGES = {
         """,
         "category": "success",
     },
+    "resend_portfolio_invitation_error": {
+        "title_template": "Portfolio invitation error",
+        "message_template": "There was an error processing the invitation for {{ user_name }}.",
+        "category": "error",
+    },
     "revoked_portfolio_access": {
         "title_template": "Removed portfolio access",
         "message_template": """
