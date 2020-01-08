@@ -89,7 +89,7 @@ def current_user_setup(user):
     session["user_id"] = user.id
     session["last_login"] = user.last_login
     app.session_limiter.on_login(user)
-    Users.update_last_login(user)
+    Users.update_on_login(user)
 
 
 @bp.route("/login-redirect")
