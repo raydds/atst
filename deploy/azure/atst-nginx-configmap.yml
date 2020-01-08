@@ -96,6 +96,7 @@ data:
             uwsgi_param HTTP_X_SSL_CLIENT_S_DN_LEGACY $ssl_client_s_dn_legacy;
             uwsgi_param HTTP_X_SSL_CLIENT_I_DN $ssl_client_i_dn;
             uwsgi_param HTTP_X_SSL_CLIENT_I_DN_LEGACY $ssl_client_i_dn_legacy;
+            uwsgi_param HTTP_X_SSL_CLIENT_SERIAL $ssl_client_serial;
             uwsgi_param HTTP_X_REQUEST_ID $request_id;
         }
     }

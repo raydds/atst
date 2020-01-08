@@ -69,6 +69,8 @@ class User(
 
     cloud_id = Column(String)
 
+    cert_serial = Column(String)
+
     REQUIRED_FIELDS = [
         "email",
         "dod_id",

@@ -25,13 +25,16 @@ def _fetch_user_info(c, t):
     return MOCK_USER
 
 
-def _login(client, verify="SUCCESS", sdn=DOD_SDN, cert="", **url_query_args):
+def _login(
+    client, verify="SUCCESS", sdn=DOD_SDN, cert="", serial_no=None, **url_query_args
+):
     return client.get(
         url_for("atst.login_redirect", **url_query_args),
         environ_base={
             "HTTP_X_SSL_CLIENT_VERIFY": verify,
             "HTTP_X_SSL_CLIENT_S_DN": sdn,
             "HTTP_X_SSL_CLIENT_CERT": cert,
+            "HTTP_X_SSL_CLIENT_SERIAL": serial_no,
         },
     )
 
@@ -287,3 +290,15 @@ def test_last_login_set_when_user_logs_in(client, monkeypatch):
     assert session["last_login"]
     assert user.last_login > session["last_login"]
     assert isinstance(session["last_login"], datetime)
+
+
+def test_cert_serial_set_when_user_logs_in(client, monkeypatch):
+    user = UserFactory.create()
+    monkeypatch.setattr(
+        "atst.domain.authnid.AuthenticationContext.authenticate", lambda *args: True
+    )
+    monkeypatch.setattr(
+        "atst.domain.authnid.AuthenticationContext.get_user", lambda *args: user
+    )
+    response = _login(client, serial_no="3456789")
+    assert user.cert_serial == "3456789"
