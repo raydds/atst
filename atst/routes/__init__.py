@@ -69,6 +69,10 @@ def _client_s_dn():
     return request.environ.get("HTTP_X_SSL_CLIENT_S_DN")
 
 
+def _cert_serial():
+    return request.environ.get("HTTP_X_SSL_CLIENT_SERIAL")
+
+
 def _make_authentication_context():
     return AuthenticationContext(
         crl_cache=app.crl_cache,
@@ -95,7 +99,7 @@ def current_user_setup(user):
     session["last_login"] = user.last_login
     app.session_limiter.on_login(user)
     app.logger.info(f"authentication succeeded for user with EDIPI {user.dod_id}")
-    Users.update_last_login(user)
+    Users.update_on_login(user, cert_serial_no=_cert_serial())
 
 
 @bp.route("/login-redirect")

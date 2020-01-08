@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from uuid import uuid4
+from unittest.mock import Mock
 
 from atst.domain.users import Users
 from atst.domain.exceptions import NotFoundError, AlreadyExistsError, UnauthorizedError
@@ -79,6 +80,18 @@ def test_update_user_with_last_login():
     last_login = new_user.last_login
     Users.update_last_login(new_user)
     assert new_user.last_login > last_login
+
+
+def test_update_on_login(monkeypatch):
+    mock_update_last_login = Mock()
+    serial_no = str(uuid4())
+    monkeypatch.setattr(
+        "atst.domain.users.Users.update_last_login", mock_update_last_login
+    )
+    new_user = UserFactory.create()
+    Users.update_on_login(new_user, cert_serial_no=serial_no)
+    assert mock_update_last_login.called
+    assert new_user.cert_serial == serial_no
 
 
 def test_get_ccpo_users():

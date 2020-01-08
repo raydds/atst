@@ -107,8 +107,18 @@ class Users(object):
         return user
 
     @classmethod
-    def update_last_login(cls, user):
+    def update_last_login(cls, user, commit=True):
         user.last_login = datetime.now()
+        if commit:
+            db.session.add(user)
+            db.session.commit()
+
+    @classmethod
+    def update_on_login(cls, user, cert_serial_no=None):
+        Users.update_last_login(user)
+        if cert_serial_no and user.cert_serial != cert_serial_no:
+            user.cert_serial = cert_serial_no
+
         db.session.add(user)
         db.session.commit()
 
