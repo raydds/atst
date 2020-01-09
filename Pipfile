@@ -32,6 +32,9 @@ msrestazure = "*"
 azure-mgmt-authorization = "*"
 azure-mgmt-managementgroups = "*"
 azure-mgmt-resource = "*"
+transitions = "*"
+azure-mgmt-consumption = "*"
+adal = "*"
 
 [dev-packages]
 bandit = "*"

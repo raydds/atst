@@ -143,7 +143,7 @@ class BaselineProvisionException(GeneralCSPException):
 
 
 class BaseCSPPayload(BaseModel):
-    #{"username": "mock-cloud", "pass": "shh"}
+    # {"username": "mock-cloud", "pass": "shh"}
     creds: Dict
 
 
@@ -156,11 +156,30 @@ class TenantCSPPayload(BaseCSPPayload):
     country_code: str
     password_recovery_email_address: str
 
+    class Config:
+        fields = {
+            "user_id": "userId",
+            "domain_name": "domainName",
+            "first_name": "firstName",
+            "last_name": "lastName",
+            "country_code": "countryCode",
+            "password_recovery_email_address": "passwordRecoveryEmailAddress",
+        }
+        allow_population_by_field_name = True
+
 
 class TenantCSPResult(BaseModel):
     user_id: str
     tenant_id: str
     user_object_id: str
+
+    class Config:
+        allow_population_by_field_name = True
+        fields = {
+            "user_id": "userId",
+            "tenant_id": "tenantId",
+            "user_object_id": "objectId",
+        }
 
 
 class BillingProfileAddress(BaseModel):
@@ -179,6 +198,8 @@ class BillingProfileAddress(BaseModel):
         "postalCode": "string"
     },
     """
+
+
 class BillingProfileCLINBudget(BaseModel):
     clinBudget: Dict
     """
@@ -190,7 +211,10 @@ class BillingProfileCLINBudget(BaseModel):
         }
     """
 
-class BillingProfileCSPPayload(BaseCSPPayload, BillingProfileAddress, BillingProfileCLINBudget):
+
+class BillingProfileCSPPayload(
+    BaseCSPPayload, BillingProfileAddress, BillingProfileCLINBudget
+):
     displayName: str
     poNumber: str
     invoiceEmailOptIn: str
@@ -411,7 +435,6 @@ class MockCloudProvider(CloudProviderInterface):
 
         return {"id": self._id(), "credentials": self._auth_credentials}
 
-
     def create_tenant(self, payload):
         """
         payload is an instance of TenantCSPPayload data class
@@ -431,7 +454,6 @@ class MockCloudProvider(CloudProviderInterface):
             "user_id": response["userId"],
             "user_object_id": response["objectId"],
         }
-
 
     def create_billing_profile(self, creds, tenant_admin_details, billing_owner_id):
         # call billing profile creation endpoint, specifying owner
@@ -474,7 +496,6 @@ class MockCloudProvider(CloudProviderInterface):
 
         response = {"id": "string"}
         return {"billing_profile_id": response["id"]}
-
 
     def create_or_update_user(self, auth_credentials, user_info, csp_role_id):
         self._authorize(auth_credentials)
@@ -556,11 +577,15 @@ class AzureSDKProvider(object):
         import azure.graphrbac as graphrbac
         import azure.common.credentials as credentials
         from msrestazure.azure_cloud import AZURE_PUBLIC_CLOUD
+        import adal
+        import requests
 
         self.subscription = subscription
         self.authorization = authorization
+        self.adal = adal
         self.graphrbac = graphrbac
         self.credentials = credentials
+        self.requests = requests
         # may change to a JEDI cloud
         self.cloud = AZURE_PUBLIC_CLOUD
 
@@ -655,20 +680,37 @@ class AzureCloudProvider(CloudProviderInterface):
             "role_name": role_assignment_id,
         }
 
+    def create_tenant(self, payload: TenantCSPPayload, suffix=2):
+        # auth as SP that is allowed to create tenant
+        # client_id = payload.creds.get("client_id", None)
+        # secret_key = payload.creds.get("secret_key", None)
+        # home_tenant_id = payload.home_tenant_id? payload.creds.tenant_id?
+        client_id = ""
+        secret_key = ""
+        home_tenant_id = ""
+        sp_token = self._get_sp_token(client_id, secret_key, home_tenant_id)
+        if sp_token is None:
+            raise AuthenticationException()
 
-    def create_tenant(self, payload):
-        # auth as SP that is allowed to create tenant? (tenant creation sp creds)
-        # create tenant with owner details (populated from portfolio point of contact, pw is generated)
+        create_tenant_body = payload.dict(by_alias=True)
 
-        # return tenant id, tenant owner id and tenant owner object id from:
-        response = {"tenantId": "string", "userId": "string", "objectId": "string"}
-        return self._ok(
-            {
-                "tenant_id": response["tenantId"],
-                "user_id": response["userId"],
-                "user_object_id": response["objectId"],
-            }
+        print(create_tenant_body)
+
+        create_tenant_headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {sp_token}",
+        }
+
+        result = self.sdk.requests.post(
+            "https://management.azure.com/providers/Microsoft.SignUp/createTenant?api-version=2020-01-01-preview",
+            json=create_tenant_body,
+            headers=create_tenant_headers,
         )
+
+        if result.status_code == 200:
+            return self._ok(TenantCSPResult(**result.json()))
+        else:
+            return self._error(result.json())
 
     def create_billing_owner(self, creds, tenant_admin_details):
         # authenticate as tenant_admin
@@ -836,6 +878,22 @@ class AzureCloudProvider(CloudProviderInterface):
 
         if sub_id_match:
             return sub_id_match.group(1)
+
+    def _get_sp_token(self, client_id, secret_key, home_tenant_id):
+        # TODO: Make endpoints consts or configs
+        authentication_endpoint = "https://login.microsoftonline.com/"
+        resource = "https://management.azure.com/"
+
+        context = self.sdk.adal.AuthenticationContext(
+            authentication_endpoint + home_tenant_id
+        )
+
+        # TODO: handle failure states here
+        token_response = context.acquire_token_with_client_credentials(
+            resource, client_id, secret_key
+        )
+
+        return token_response.get("accessToken", None)
 
     def _get_credential_obj(self, creds, resource=None):
 

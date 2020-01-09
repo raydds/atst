@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8463b4504031c297a33771070b92a67eb8abbc2089814b5460fda5a51a28c7f5"
+            "sha256": "339c37f516fc1f0701475c05f78f9700a36d7ca8df44689014322edd8ff59806"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -21,6 +21,7 @@
                 "sha256:5a7f1e037c6290c6d7609cab33a9e5e988c2fbec5c51d1c4c649ee3faff37eaf",
                 "sha256:fd17e5661f60634ddf96a569b95d34ccb8a98de60593d729c28bdcfe360eaad1"
             ],
+            "index": "pypi",
             "version": "==1.2.2"
         },
         "alembic": {
@@ -59,6 +60,14 @@
             ],
             "index": "pypi",
             "version": "==0.60.0"
+        },
+        "azure-mgmt-consumption": {
+            "hashes": [
+                "sha256:035d4b74ca7c47e2683bea17105fd9014c27060336fb6255324ac86b27f70f5b",
+                "sha256:af319ad6e3ec162a7578563f149e3cdd7d833a62ec80761cfd93caf79467610b"
+            ],
+            "index": "pypi",
+            "version": "==3.0.0"
         },
         "azure-mgmt-managementgroups": {
             "hashes": [
@@ -554,6 +563,14 @@
             ],
             "version": "==0.36.1"
         },
+        "transitions": {
+            "hashes": [
+                "sha256:2822e51bd4108bb9730cd883da0949d9948c2d8638b3fb78f19c80f6865dfa4c",
+                "sha256:b73015080833b753cbb4a10f51f8234924ddfbdbaf33539fee4e4f3abfff454d"
+            ],
+            "index": "pypi",
+            "version": "==0.7.1"
+        },
         "unipath": {
             "hashes": [
                 "sha256:09839adcc72e8a24d4f76d63656f30b5a1f721fc40c9bcd79d8c67bdd8b47dae",
@@ -614,6 +631,14 @@
                 "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
             ],
             "version": "==1.4.3"
+        },
+        "appnope": {
+            "hashes": [
+                "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0",
+                "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"
+            ],
+            "markers": "sys_platform == 'darwin'",
+            "version": "==0.1.0"
         },
         "argh": {
             "hashes": [
