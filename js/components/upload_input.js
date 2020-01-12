@@ -1,5 +1,7 @@
 import { buildUploader } from '../lib/upload'
 import { emitFieldChange } from '../lib/emitters'
+import escape from '../lib/escape'
+import inputValidations from '../lib/input_validations'
 
 export default {
   name: 'uploadinput',
@@ -28,6 +30,7 @@ export default {
       changed: false,
       uploadError: false,
       sizeError: false,
+      filenameError: false,
       downloadLink: '',
     }
   },
@@ -50,19 +53,23 @@ export default {
         this.sizeError = true
         return
       }
+      if (!this.validateFileName(file.name)) {
+        this.filenameError = true
+        return
+      }
 
       const uploader = await this.getUploader()
       const response = await uploader.upload(file)
       if (response.ok) {
         this.attachment = e.target.value
-        this.$refs.attachmentFilename.value = file.name
+        this.$refs.attachmentFilename.value = escape(file.name)
         this.$refs.attachmentObjectName.value = response.objectName
         this.$refs.attachmentInput.disabled = true
         emitFieldChange(this)
         this.changed = true
 
         this.downloadLink = await this.getDownloadLink(
-          file.name,
+          escape(file.name),
           response.objectName
         )
       } else {
@@ -70,6 +77,10 @@ export default {
         this.changed = true
         this.uploadError = true
       }
+    },
+    validateFileName: function(name) {
+      const regex = inputValidations.restrictedFileName.match
+      return regex.test(name)
     },
     removeAttachment: function(e) {
       e.preventDefault()
@@ -118,7 +129,8 @@ export default {
       return (
         (!this.changed && this.initialErrors) ||
         this.uploadError ||
-        this.sizeError
+        this.sizeError ||
+        this.filenameError
       )
     },
     valid: function() {

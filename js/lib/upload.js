@@ -1,5 +1,6 @@
 import Azure from 'azure-storage'
 import 'whatwg-fetch'
+import escape from './escape'
 
 class AzureUploader {
   constructor(accountName, containerName, sasToken, objectName) {
@@ -20,7 +21,7 @@ class AzureUploader {
         contentType: 'application/pdf',
       },
       metadata: {
-        filename: file.name,
+        filename: escape(file.name),
       },
     }
 
