@@ -80,7 +80,8 @@ def test_crl_validation_on_login(
 
     crl_list = make_crl_list(good_cert, crl_file)
     cache = CRLCache(ca_file, crl_dir, crl_list=crl_list)
-    assert cache.crl_check(good_cert.public_bytes(Encoding.PEM).decode())
+    parsed_cert = cache.crl_check(good_cert.public_bytes(Encoding.PEM).decode())
+    assert isinstance(parsed_cert, crypto.X509)
     with pytest.raises(CRLRevocationException):
         cache.crl_check(bad_cert.public_bytes(Encoding.PEM).decode())
 

@@ -89,9 +89,10 @@ def test_update_on_login(monkeypatch):
         "atst.domain.users.Users.update_last_login", mock_update_last_login
     )
     new_user = UserFactory.create()
-    Users.update_on_login(new_user, cert_serial_no=serial_no)
+    Users.update_on_login(new_user, cert_serial_no=serial_no, issuer=12345)
     assert mock_update_last_login.called
     assert new_user.cert_serial == serial_no
+    assert new_user.issuer_hash == 12345
 
 
 def test_get_ccpo_users():

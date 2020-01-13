@@ -15,13 +15,14 @@ class AuthenticationContext:
         self.auth_status = auth_status
         self.sdn = sdn
         self.cert = cert.encode()
+        self.user_cert = None
         self._parsed_sdn = None
 
     def authenticate(self):
         if not self.auth_status == "SUCCESS":
             raise UnauthenticatedError("SSL/TLS client authentication failed")
 
-        self._crl_check()
+        self.user_cert = self._crl_check()
 
         return True
 
@@ -44,7 +45,7 @@ class AuthenticationContext:
 
     def _crl_check(self):
         try:
-            self.crl_cache.crl_check(self.cert)
+            return self.crl_cache.crl_check(self.cert)
         except CRLRevocationException as exc:
             raise UnauthenticatedError("CRL check failed. " + str(exc))
 
@@ -57,3 +58,10 @@ class AuthenticationContext:
                 raise UnauthenticatedError(str(exc))
 
         return self._parsed_sdn
+
+    @property
+    def issuer_hash(self):
+        if self.user_cert is None:
+            return None
+        else:
+            return self.user_cert.get_issuer().hash()

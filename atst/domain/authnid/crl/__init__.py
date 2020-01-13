@@ -161,12 +161,22 @@ class CRLCache(CRLInterface):
             return self._add_certificate_chain_to_store(store, ca.get_issuer())
 
     def crl_check(self, cert):
+        """
+        Given a PEM-encoded certificate, this method will check the cert's
+        issuer, find the matching CRL and CA in its cache, and validate the
+        certificate.
+
+        :param cert: String, a PEM-encoded certificate
+        :returns: the parsed OpenSSL.crypto.X509 certification
+        :raises CRLInvalidException: if the CRL in the cache has expired
+        :raises CRLRevocationException: if the client certificate has been revoked or another error occured
+        """
         parsed = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
         store = self._get_store(parsed)
         context = crypto.X509StoreContext(store, parsed)
         try:
             context.verify_certificate()
-            return True
+            return parsed
 
         except crypto.X509StoreContextError as err:
             if err.args[0][0] == CRL_EXPIRED_ERROR_CODE:

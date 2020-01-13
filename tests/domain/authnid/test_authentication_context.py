@@ -1,4 +1,5 @@
 import pytest
+from OpenSSL import crypto
 
 from atst.domain.authnid import AuthenticationContext
 from atst.domain.authnid.crl import (
@@ -22,7 +23,8 @@ class MockCRLCache:
 
     def crl_check(self, cert):
         if self.valid:
-            return True
+            parsed = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
+            return parsed
         elif self.expired == True:
             raise CRLInvalidException()
 
@@ -94,3 +96,10 @@ def test_user_cert_has_no_email():
     user = auth_context.get_user()
 
     assert user.email == None
+
+
+def test_issuer_hash():
+    auth_context = AuthenticationContext(MockCRLCache(), "SUCCESS", DOD_SDN, CERT)
+    assert auth_context.issuer_hash is None
+    auth_context.authenticate()
+    assert isinstance(auth_context.issuer_hash, int)

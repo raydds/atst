@@ -292,11 +292,12 @@ def test_last_login_set_when_user_logs_in(client, monkeypatch):
     assert isinstance(session["last_login"], datetime)
 
 
-def test_cert_serial_set_when_user_logs_in(client, monkeypatch):
+def test_cert_info_set_when_user_logs_in(client, monkeypatch):
     user = UserFactory.create()
     monkeypatch.setattr(
         "atst.domain.authnid.AuthenticationContext.authenticate", lambda *args: True
     )
+    monkeypatch.setattr("atst.domain.authnid.AuthenticationContext.issuer_hash", 56789)
     monkeypatch.setattr(
         "atst.domain.authnid.AuthenticationContext.get_user", lambda *args: user
     )

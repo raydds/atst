@@ -94,12 +94,12 @@ def redirect_after_login_url():
         return url_for("atst.home")
 
 
-def current_user_setup(user):
+def current_user_setup(user, issuer=None):
     session["user_id"] = user.id
     session["last_login"] = user.last_login
     app.session_limiter.on_login(user)
     app.logger.info(f"authentication succeeded for user with EDIPI {user.dod_id}")
-    Users.update_on_login(user, cert_serial_no=_cert_serial())
+    Users.update_on_login(user, cert_serial_no=_cert_serial(), issuer=issuer)
 
 
 @bp.route("/login-redirect")
@@ -109,7 +109,7 @@ def login_redirect():
         auth_context.authenticate()
 
         user = auth_context.get_user()
-        current_user_setup(user)
+        current_user_setup(user, issuer=auth_context.issuer_hash)
     except UnauthenticatedError as err:
         app.logger.info(
             f"authentication failed for subject distinguished name {_client_s_dn()}"

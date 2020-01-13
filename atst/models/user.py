@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Column, Date, Table, TIMESTAMP
+from sqlalchemy import String, ForeignKey, Column, Date, Table, TIMESTAMP, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.event import listen
@@ -70,6 +70,7 @@ class User(
     cloud_id = Column(String)
 
     cert_serial = Column(String)
+    issuer_hash = Column(Integer)
 
     REQUIRED_FIELDS = [
         "email",

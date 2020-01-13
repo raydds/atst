@@ -114,9 +114,10 @@ class Users(object):
             db.session.commit()
 
     @classmethod
-    def update_on_login(cls, user, cert_serial_no=None):
+    def update_on_login(cls, user, cert_serial_no=None, issuer=None):
         Users.update_last_login(user)
-        if cert_serial_no and user.cert_serial != cert_serial_no:
+        if issuer and cert_serial_no and user.cert_serial != cert_serial_no:
+            user.issuer_hash = issuer
             user.cert_serial = cert_serial_no
 
         db.session.add(user)
